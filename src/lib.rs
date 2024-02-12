@@ -80,10 +80,14 @@ impl Merkle {
     }
 
     fn update_root(&mut self) {
-        let mut root = String::from("");
+        let mut root = String::new();
         let mut subtrees_iter = self.subtrees.iter();
-        for _i in 0..self.subtrees.len() {
+        let len = self.subtrees.len();
+        for i in 0..len {
             if let Some(Some(tree)) = subtrees_iter.next() {
+                if root.is_empty() && i != len - 1 {
+                    root = tree.root.clone();
+                }
                 root = encode(format!("{}{}", tree.root, root));
             } else {
                 //If there is no subtree of a certain size, we repeat the root
