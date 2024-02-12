@@ -1,5 +1,5 @@
 <!-- Merkle tree -->
-## Implementation
+# Implementation
 
 The implementation relies on the MerklePow2, which is a Merkle tree whose number of elements is a perfect power of 2. MerklePow2 trees only store their root and their base elements. They are easy to join (by just joining their bases and computing the new root from the two roots).
 
