@@ -4,13 +4,17 @@ struct MerklePow2 {
     base: Vec<String>,
 }
 #[derive(Debug, PartialEq, Eq)]
-struct Merkle {
+pub struct Merkle {
     root: String,
     subtrees: Vec<Option<MerklePow2>>,
 }
 
 fn encode(data: String) -> String {
     data
+}
+
+enum Error {
+    Absent,
 }
 
 impl MerklePow2 {
@@ -118,6 +122,27 @@ impl Merkle {
             self.update_root();
         }
     }
+
+    /*Returns proof that element is present. The user can verify it
+    by succesively hashing their key against the returned keys.
+    If the element is absent from the tree, returns Error Absent.
+    */
+    fn contains(&self, key: String) -> bool {
+        let mut iter = self.subtrees.iter();
+        let hash = encode(key);
+        for _i in 0..self.subtrees.len() {
+            if let Some(Some(t)) = iter.next() {
+                for k in t.base {
+                    if k == hash {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    //fn proof(key: String) -> Result<Vec<String>, Error> {}
 }
 #[cfg(test)]
 mod tests {
