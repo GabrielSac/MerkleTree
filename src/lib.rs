@@ -14,7 +14,7 @@ fn encode(data: String) -> String {
 }
 
 enum Error {
-    Absent,
+    NotFound,
 }
 
 impl MerklePow2 {
@@ -41,14 +41,47 @@ impl MerklePow2 {
     }
 
     //This function is called only for trees of the same size
+    //The tree it is called upon is assumed to be the one on the right
     fn join(&mut self, tree: &MerklePow2) {
-        self.root = encode(format!("{}{}", self.root, tree.root));
-        self.base = self
+        self.root = encode(format!("{}{}", tree.root, self.root));
+        self.base = tree
             .base
             .iter()
             .cloned()
-            .chain(tree.base.iter().cloned())
+            .chain(self.base.iter().cloned())
             .collect();
+    }
+
+    //Saves the proof for the presence of key in the vector Proof. If the element is absent
+    //the function does nothing. The last element in the proof is the root of the tree
+    fn generate_proof(base: &Vec<String>, hash: String, proof: &mut Vec<String>) {
+        let mut new_hash = hash.clone();
+        if base.len() == 1 {
+            if base[0] == hash {
+                proof.push(base[0].clone());
+            }
+        } else {
+            let mut next_layer: Vec<String> = Vec::new();
+            let mut iterator = base.iter();
+            let mut found = false;
+            while let Some(elem1) = iterator.next() {
+                let elem2 = iterator.next().unwrap();
+                let combination = encode(format!("{}{}", elem1, elem2));
+                if *elem1 == hash {
+                    proof.push(elem2.clone());
+                    found = true;
+                    new_hash = combination.clone();
+                } else if *elem2 == hash {
+                    proof.push(elem1.clone());
+                    found = true;
+                    new_hash = combination.clone();
+                }
+                next_layer.push(combination);
+            }
+            if found {
+                MerklePow2::generate_proof(&next_layer, new_hash, proof)
+            }
+        }
     }
 }
 
@@ -73,7 +106,7 @@ impl Merkle {
             len /= 2;
         }
         //Compute the root from the subtrees
-        let mut root = String::from("");
+        let root = String::from("");
         let mut tree = Merkle { root, subtrees };
         tree.update_root();
         tree
@@ -146,8 +179,6 @@ impl Merkle {
 }
 #[cfg(test)]
 mod tests {
-    use std::string;
-
     use super::*;
 
     #[test]
@@ -164,6 +195,31 @@ mod tests {
         //print!("{:?}", tree);
     }
     #[test]
+    fn proof_merklepow2() {
+        let data = vec![
+            String::from("a"),
+            String::from("b"),
+            String::from("c"),
+            String::from("d"),
+            String::from("e"),
+            String::from("f"),
+            String::from("g"),
+            String::from("h"),
+        ];
+        let tree = MerklePow2::new(data);
+        let mut proof: Vec<String> = Vec::new();
+        MerklePow2::generate_proof(&tree.base, String::from("d"), &mut proof);
+        assert_eq!(
+            proof,
+            vec![
+                String::from("c"),
+                String::from("ab"),
+                String::from("efgh"),
+                String::from("abcdefgh")
+            ]
+        );
+    }
+    #[test]
     fn build_merkle() {
         let data = vec![
             String::from("a"),
@@ -175,7 +231,7 @@ mod tests {
         ];
         let tree = Merkle::new(data);
         let correct_tree = Merkle {
-            root: String::from("aacdab"),
+            root: String::from("aacdabab"),
             subtrees: vec![
                 None,
                 Some(MerklePow2 {
@@ -194,7 +250,6 @@ mod tests {
             ],
         };
         assert_eq!(tree, correct_tree);
-        //print!("{:?}", tree);
     }
     #[test]
     fn join() {
@@ -211,8 +266,8 @@ mod tests {
             String::from("h"),
         ];
         let mut tree1 = MerklePow2::new(data1);
-        let mut tree2 = MerklePow2::new(data2);
-        tree1.join(&mut tree2);
+        let tree2 = MerklePow2::new(data2);
+        tree1.join(&tree2);
         print!("{:?}", tree1);
     }
 
