@@ -132,8 +132,8 @@ impl Merkle {
         let hash = encode(key);
         for _i in 0..self.subtrees.len() {
             if let Some(Some(t)) = iter.next() {
-                for k in t.base {
-                    if k == hash {
+                for k in &t.base {
+                    if *k == hash {
                         return true;
                     }
                 }
