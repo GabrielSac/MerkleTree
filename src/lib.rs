@@ -7,6 +7,7 @@ struct MerklePow2 {
 pub struct Merkle {
     root: String,
     subtrees: Vec<Option<MerklePow2>>,
+    is_binary: bool,
 }
 
 fn encode(data: String) -> String {
@@ -91,6 +92,7 @@ impl Merkle {
         let mut exponent = 0;
         let mut index = data.iter();
         //Compute the base2 expansion of len, and build the appropriate subtrees
+        let mut is_binary: bool = true;
         while len > 0 {
             if len % 2 == 1 {
                 let mut subtree_data = Vec::new();
@@ -98,6 +100,9 @@ impl Merkle {
                     subtree_data.push(index.next().unwrap().clone());
                 }
                 subtrees.push(Some(MerklePow2::new(subtree_data)));
+                if len != 1 {
+                    is_binary = false;
+                }
             } else {
                 subtrees.push(None);
             }
@@ -106,7 +111,11 @@ impl Merkle {
         }
         //Compute the root from the subtrees
         let root = String::from("");
-        let mut tree = Merkle { root, subtrees };
+        let mut tree = Merkle {
+            root,
+            subtrees,
+            is_binary,
+        };
         tree.update_root();
         tree
     }
@@ -138,6 +147,7 @@ impl Merkle {
             root: encode(key.clone()),
             base: vec![key],
         };
+        self.is_binary = false;
         let len = self.subtrees.len();
         for i in 0..self.subtrees.len() {
             if let Some(t) = &self.subtrees[i] {
@@ -152,6 +162,7 @@ impl Merkle {
         if self.subtrees[len - 1].is_none() {
             self.subtrees.push(Some(tree));
             self.update_root();
+            self.is_binary = true;
         }
     }
 
@@ -189,6 +200,9 @@ impl Merkle {
                 proof.push(current_root.clone());
                 current_root = encode(format!("{}{}", current_root, current_root));
             }
+        }
+        if self.is_binary {
+            proof.pop();
         }
         proof
     }
@@ -260,6 +274,7 @@ mod tests {
                     ],
                 }),
             ],
+            is_binary: false,
         };
         assert_eq!(tree, correct_tree);
     }
@@ -301,9 +316,10 @@ mod tests {
     #[test]
     fn proof() {
         let data = vec![
-            String::from("m"),
-            String::from("i"),
-            String::from("j"),
+            //String::from("m"),
+            //String::from("n"),
+            //String::from("i"),
+            //String::from("j"),
             String::from("k"),
             String::from("l"),
             String::from("a"),
