@@ -13,10 +13,6 @@ fn encode(data: String) -> String {
     data
 }
 
-enum Error {
-    NotFound,
-}
-
 impl MerklePow2 {
     //Precondition: data has length power of 2
     fn new(data: Vec<String>) -> Self {
@@ -53,13 +49,11 @@ impl MerklePow2 {
     }
 
     //Saves the proof for the presence of key in the vector Proof. If the element is absent
-    //the function does nothing. The last element in the proof is the root of the tree
-    fn generate_proof(base: &Vec<String>, hash: String, proof: &mut Vec<String>) {
+    //the function returns false and doesn't modify the prrof.
+    fn generate_proof_rec(base: &Vec<String>, hash: String, proof: &mut Vec<String>) -> bool {
         let mut new_hash = hash.clone();
         if base.len() == 1 {
-            if base[0] == hash {
-                proof.push(base[0].clone());
-            }
+            base[0] == hash
         } else {
             let mut next_layer: Vec<String> = Vec::new();
             let mut iterator = base.iter();
@@ -79,9 +73,14 @@ impl MerklePow2 {
                 next_layer.push(combination);
             }
             if found {
-                MerklePow2::generate_proof(&next_layer, new_hash, proof)
+                MerklePow2::generate_proof_rec(&next_layer, new_hash, proof);
             }
+            found
         }
+    }
+
+    fn generate_proof(&self, hash: String, proof: &mut Vec<String>) -> bool {
+        MerklePow2::generate_proof_rec(&self.base, hash, proof)
     }
 }
 
@@ -156,26 +155,43 @@ impl Merkle {
         }
     }
 
-    /*Returns proof that element is present. The user can verify it
-    by succesively hashing their key against the returned keys.
-    If the element is absent from the tree, returns Error Absent.
-    */
-    fn contains(&self, key: String) -> bool {
-        let mut iter = self.subtrees.iter();
+    //Returns proof that key is in the tree.
+    //If the key is not in the tree, returns empty vector
+    fn proof(&self, key: String) -> Vec<String> {
+        let mut proof: Vec<String> = Vec::new();
         let hash = encode(key);
-        for _i in 0..self.subtrees.len() {
-            if let Some(Some(t)) = iter.next() {
-                for k in &t.base {
-                    if *k == hash {
-                        return true;
-                    }
+        let mut current_root: String = String::new();
+        let mut found = false;
+        let mut subtree_it = self.subtrees.iter();
+        //Look for the element
+        while let Some(t) = subtree_it.next() {
+            if let Some(s) = t {
+                found = s.generate_proof(hash.clone(), &mut proof);
+                if current_root.is_empty() {
+                    current_root = s.root.clone();
                 }
+                if found {
+                    proof.push(current_root.clone());
+                    current_root = encode(format!("{}{}", s.root, current_root));
+                    break;
+                }
+                current_root = encode(format!("{}{}", s.root, current_root));
+            } else {
+                current_root = encode(format!("{}{}", current_root, current_root));
             }
         }
-        return false;
+        //Found the element, continue building the proof
+        while let Some(t) = subtree_it.next() {
+            if let Some(s) = t {
+                proof.push(s.root.clone());
+                current_root = encode(format!("{}{}", s.root, current_root));
+            } else {
+                proof.push(current_root.clone());
+                current_root = encode(format!("{}{}", current_root, current_root));
+            }
+        }
+        proof
     }
-
-    //fn proof(key: String) -> Result<Vec<String>, Error> {}
 }
 #[cfg(test)]
 mod tests {
@@ -208,16 +224,12 @@ mod tests {
         ];
         let tree = MerklePow2::new(data);
         let mut proof: Vec<String> = Vec::new();
-        MerklePow2::generate_proof(&tree.base, String::from("d"), &mut proof);
+        let contains = tree.generate_proof(String::from("d"), &mut proof);
         assert_eq!(
             proof,
-            vec![
-                String::from("c"),
-                String::from("ab"),
-                String::from("efgh"),
-                String::from("abcdefgh")
-            ]
+            vec![String::from("c"), String::from("ab"), String::from("efgh")]
         );
+        assert!(contains);
     }
     #[test]
     fn build_merkle() {
@@ -284,5 +296,31 @@ mod tests {
         println!("{:?}", tree);
         tree.add_key(String::from("f"));
         println!("{:?}", tree);
+    }
+
+    #[test]
+    fn proof() {
+        let data = vec![
+            String::from("m"),
+            String::from("i"),
+            String::from("j"),
+            String::from("k"),
+            String::from("l"),
+            String::from("a"),
+            String::from("b"),
+            String::from("c"),
+            String::from("d"),
+            String::from("e"),
+            String::from("f"),
+            String::from("g"),
+            String::from("h"),
+        ];
+        let tree = Merkle::new(data);
+        let proof: Vec<String> = tree.proof(String::from("k"));
+        println!("{:?}", proof);
+
+        let tree2 = Merkle::new(vec![String::from("a")]);
+        let proof2 = tree2.proof(String::from("b"));
+        println!("{:?}", proof2);
     }
 }
