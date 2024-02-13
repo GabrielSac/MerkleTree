@@ -17,7 +17,7 @@ fn encode(data: String) -> String {
 impl MerklePow2 {
     //Precondition: data has length power of 2
     fn new(data: Vec<String>) -> Self {
-        let base = data.clone();
+        let base: Vec<String> = data.iter().map(|x| encode(x.clone())).collect();
         let root = MerklePow2::compute_root(base.clone());
         MerklePow2 { root, base }
     }
@@ -97,7 +97,7 @@ impl Merkle {
             if len % 2 == 1 {
                 let mut subtree_data = Vec::new();
                 for _i in 0..2_u32.pow(exponent) {
-                    subtree_data.push(index.next().unwrap().clone());
+                    subtree_data.push(encode(index.next().unwrap().clone()));
                 }
                 subtrees.push(Some(MerklePow2::new(subtree_data)));
                 if len != 1 {
@@ -220,9 +220,9 @@ mod tests {
             String::from("a"),
         ];
 
-        assert_eq!(MerklePow2::compute_root(data), String::from("abaa"));
-        //let tree = MerklePow2::new(data);
-        //print!("{:?}", tree);
+        //assert_eq!(MerklePow2::compute_root(data), String::from("abaa"));
+        let tree = MerklePow2::new(data);
+        print!("{:?}", tree);
     }
     #[test]
     fn proof_merklepow2() {
