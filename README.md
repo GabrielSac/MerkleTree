@@ -8,7 +8,7 @@ This library implements the Merkle tree structure. It supports the following ope
 
 Additional features can be implemented, such as adding multiple keys at the same time. 
 
-Disclaimer: currently the implementation does not really hash the data in the tree to allow for easy testing. The encode function bypasses the info. 
+Disclaimer 1: currently the implementation does not really hash the data in the tree to allow for easy testing. The encode function bypasses the info. 
 
 # Implementation
 
