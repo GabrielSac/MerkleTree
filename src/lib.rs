@@ -220,9 +220,7 @@ mod tests {
             String::from("a"),
         ];
 
-        //assert_eq!(MerklePow2::compute_root(data), String::from("abaa"));
-        let tree = MerklePow2::new(data);
-        print!("{:?}", tree);
+        assert_eq!(MerklePow2::compute_root(data), String::from("abaa"));
     }
     #[test]
     fn proof_merklepow2() {
@@ -295,22 +293,48 @@ mod tests {
         let mut tree1 = MerklePow2::new(data1);
         let tree2 = MerklePow2::new(data2);
         tree1.join(&tree2);
-        print!("{:?}", tree1);
+        assert_eq!(
+            tree1,
+            MerklePow2 {
+                root: String::from("efghabcd"),
+                base: vec![
+                    String::from("e"),
+                    String::from("f"),
+                    String::from("g"),
+                    String::from("h"),
+                    String::from("a"),
+                    String::from("b"),
+                    String::from("c"),
+                    String::from("d"),
+                ]
+            }
+        );
     }
 
     #[test]
     fn add_key() {
         let data1 = vec![String::from("a"), String::from("b")];
         let mut tree = Merkle::new(data1);
-        println!("{:?}", tree);
+        //println!("{:?}", tree);
         tree.add_key(String::from("c"));
-        println!("{:?}", tree);
+        //println!("{:?}", tree);
         tree.add_key(String::from("d"));
-        println!("{:?}", tree);
+        //println!("{:?}", tree);
         tree.add_key(String::from("e"));
-        println!("{:?}", tree);
+        //println!("{:?}", tree);
         tree.add_key(String::from("f"));
-        println!("{:?}", tree);
+        //println!("{:?}", tree);
+        assert_eq!(
+            tree,
+            Merkle::new(vec![
+                String::from("e"),
+                String::from("f"),
+                String::from("a"),
+                String::from("b"),
+                String::from("c"),
+                String::from("d")
+            ])
+        );
     }
 
     #[test]
@@ -333,10 +357,18 @@ mod tests {
         ];
         let tree = Merkle::new(data);
         let proof: Vec<String> = tree.proof(String::from("d"));
-        println!("{:?}", proof);
+        assert_eq!(
+            proof,
+            vec![
+                String::from("c"),
+                String::from("ab"),
+                String::from("efgh"),
+                String::from("ijklmnmn"),
+            ]
+        );
 
         let tree2 = Merkle::new(vec![String::from("a")]);
         let proof2 = tree2.proof(String::from("b"));
-        println!("{:?}", proof2);
+        assert!(proof2.is_empty());
     }
 }
