@@ -51,7 +51,7 @@ impl MerklePow2 {
 
     //Saves the proof for the presence of key in the vector Proof. If the element is absent
     //the function returns false and doesn't modify the prrof.
-    fn generate_proof_rec(base: &Vec<String>, hash: String, proof: &mut Vec<String>) -> bool {
+    fn generate_proof_rec(base: &[String], hash: String, proof: &mut Vec<String>) -> bool {
         let mut new_hash = hash.clone();
         if base.len() == 1 {
             base[0] == hash
@@ -172,10 +172,10 @@ impl Merkle {
         let mut proof: Vec<String> = Vec::new();
         let hash = encode(key);
         let mut current_root: String = String::new();
-        let mut found = false;
+        let mut found: bool;
         let mut subtree_it = self.subtrees.iter();
         //Look for the element
-        while let Some(t) = subtree_it.next() {
+        for t in subtree_it.by_ref() {
             if let Some(s) = t {
                 found = s.generate_proof(hash.clone(), &mut proof);
                 if current_root.is_empty() {
@@ -192,7 +192,7 @@ impl Merkle {
             }
         }
         //Found the element, continue building the proof
-        while let Some(t) = subtree_it.next() {
+        for t in subtree_it.by_ref() {
             if let Some(s) = t {
                 proof.push(s.root.clone());
                 current_root = encode(format!("{}{}", s.root, current_root));
@@ -316,10 +316,10 @@ mod tests {
     #[test]
     fn proof() {
         let data = vec![
-            //String::from("m"),
-            //String::from("n"),
-            //String::from("i"),
-            //String::from("j"),
+            String::from("m"),
+            String::from("n"),
+            String::from("i"),
+            String::from("j"),
             String::from("k"),
             String::from("l"),
             String::from("a"),
@@ -332,7 +332,7 @@ mod tests {
             String::from("h"),
         ];
         let tree = Merkle::new(data);
-        let proof: Vec<String> = tree.proof(String::from("k"));
+        let proof: Vec<String> = tree.proof(String::from("d"));
         println!("{:?}", proof);
 
         let tree2 = Merkle::new(vec![String::from("a")]);
