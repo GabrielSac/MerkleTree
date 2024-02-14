@@ -13,6 +13,7 @@ Disclaimer 1: currently the implementation does not really hash the data in the 
 # Usage 
 Run 
 ```
+cargo doc
 cargo doc --open 
 ```
 to read information on available functions. 
