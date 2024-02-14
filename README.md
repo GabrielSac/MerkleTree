@@ -30,6 +30,21 @@ Adding a new element to the tree is performed in the same way as we sum 1 to a b
 ``
 new(data: Vec< String>)-> Merkle
 ``
+
 Linear in the size of data vector (the total size of a binary tree is approx. twice the size of its base).
 
+``
+add_key(&self, key:String)
+``
+
+The amortized time complexity is logarithmic in the number of keys in the tree. 
+
+Explanation: Adding 2^n consecutive keys to an empty Merkle is equivalent to increasing a binary counter from 0 to 2^n. The cost of each add is determined by the sizes of the trees the join function is called on (because needs to append the base vector of the right tree to the base vector of the left tree). 
+
+A join occurs each time a bit in the counter changes from 1 to 0. The cost of that join is equal to the bit position in the counter (joins of more significant digits have higher costs because the tree bases are larger).
+
+The total cost for all 2^n operations is:
+```math
+\sum_{i=0}^n 
+```
 
