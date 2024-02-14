@@ -7,7 +7,7 @@ struct MerklePow2 {
 pub struct Merkle {
     root: String,
     subtrees: Vec<Option<MerklePow2>>,
-    is_binary: bool,
+    is_complete: bool,
 }
 
 fn encode(data: String) -> String {
@@ -92,7 +92,7 @@ impl Merkle {
         let mut exponent = 0;
         let mut index = data.iter();
         //Compute the base2 expansion of len, and build the appropriate subtrees
-        let mut is_binary: bool = true;
+        let mut is_complete: bool = true;
         while len > 0 {
             if len % 2 == 1 {
                 let mut subtree_data = Vec::new();
@@ -101,7 +101,7 @@ impl Merkle {
                 }
                 subtrees.push(Some(MerklePow2::new(subtree_data)));
                 if len != 1 {
-                    is_binary = false;
+                    is_complete = false;
                 }
             } else {
                 subtrees.push(None);
@@ -114,7 +114,7 @@ impl Merkle {
         let mut tree = Merkle {
             root,
             subtrees,
-            is_binary,
+            is_complete,
         };
         tree.update_root();
         tree
@@ -147,7 +147,7 @@ impl Merkle {
             root: encode(key.clone()),
             base: vec![key],
         };
-        self.is_binary = false;
+        self.is_complete = false;
         let len = self.subtrees.len();
         for i in 0..self.subtrees.len() {
             if let Some(t) = &self.subtrees[i] {
@@ -162,7 +162,7 @@ impl Merkle {
         if self.subtrees[len - 1].is_none() {
             self.subtrees.push(Some(tree));
             self.update_root();
-            self.is_binary = true;
+            self.is_complete = true;
         }
     }
 
@@ -201,7 +201,7 @@ impl Merkle {
                 current_root = encode(format!("{}{}", current_root, current_root));
             }
         }
-        if self.is_binary {
+        if self.is_complete {
             proof.pop();
         }
         proof
@@ -274,7 +274,7 @@ mod tests {
                     ],
                 }),
             ],
-            is_binary: false,
+            is_complete: false,
         };
         assert_eq!(tree, correct_tree);
     }
