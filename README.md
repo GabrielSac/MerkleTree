@@ -10,6 +10,9 @@ Additional features can be implemented, such as adding multiple keys at the same
 
 Disclaimer 1: currently the implementation does not really hash the data in the tree to allow for easy testing. The encode function bypasses the info. 
 
+# Usage 
+
+
 # Implementation
 
 The implementation relies on the MerklePow2, which is a Merkle tree whose number of elements is a perfect power of 2. MerklePow2 trees only store their root and their base elements. MerklePow2 trees of the same size are easy to join (by just joining their bases and computing the new root from the two roots).
