@@ -1,7 +1,7 @@
 <!-- Merkle tree -->
 # Merkle tree
 This library implements the Merkle tree structure. It supports the following operations:
-* new(data: Vec<String>): builds Merkle tree from input data
+* new(data: Vec< String>): builds Merkle tree from input data
 * get_root(&self)-> String
 * add_key(&self, key:String)
 * proof(&self, key:String): Returns a proof that the key is indeed in the tree. The proof consists in a sequence of hashes against which the user hashes their own key (following the upward path in the tree). If the element is not in the tree, returns empty proof. 
