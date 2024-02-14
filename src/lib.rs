@@ -41,6 +41,7 @@ impl MerklePow2 {
     //This function is called only for trees of the same size
     //The tree it is called upon is assumed to be the one on the right
     fn join(&mut self, tree: &MerklePow2) {
+        debug_assert_eq!(self.base.len(), tree.base.len());
         self.root = encode(format!("{}{}", tree.root, self.root));
         self.base = tree
             .base
