@@ -50,7 +50,7 @@ The total cost for all 2^n operations is:
 
 Thus, the amortized cost for all 2^n operations is:
 ```math
-\frac{(n+1)2^{n-1}}{2^n }^right = (n+1)/2
+\frac{(n+1)2^{n-1}}{2^n } = (n+1)/2
 ```
 
 which is logarithmic in the number of added keys. 
