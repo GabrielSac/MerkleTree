@@ -3,6 +3,7 @@ struct MerklePow2 {
     root: String,
     base: Vec<String>,
 }
+///Documentate Merkle
 #[derive(Debug, PartialEq, Eq)]
 pub struct Merkle {
     root: String,
@@ -86,7 +87,14 @@ impl MerklePow2 {
 }
 
 impl Merkle {
-    fn new(data: Vec<String>) -> Self {
+    /// Generate new Merkle tree from input data. There is no restriction to the number of keys.
+    /// # Example
+    ///```
+    /// let data = vec![String::from("a"), String::from("b")];
+    ///
+    /// let tree = Merkle::new(data);
+    /// ```
+    pub fn new(data: Vec<String>) -> Self {
         let mut len = data.len();
         let mut subtrees = Vec::new();
         let mut exponent = 0;
@@ -120,7 +128,8 @@ impl Merkle {
         tree
     }
 
-    fn get_root(&self) -> String {
+    /// Returns the root of the Merkle tree.
+    pub fn get_root(&self) -> String {
         self.root.clone()
     }
 
@@ -142,7 +151,15 @@ impl Merkle {
         self.root = root;
     }
 
-    fn add_key(&mut self, key: String) {
+    ///Adds a single key to the tree.
+    ///
+    /// # Example
+    /// ```
+    /// let tree = Merkle::new(vec![String::from("a")]);
+    ///
+    /// tree.add_key("b");
+    /// ```
+    pub fn add_key(&mut self, key: String) {
         let mut tree = MerklePow2 {
             root: encode(key.clone()),
             base: vec![key],
@@ -166,9 +183,21 @@ impl Merkle {
         }
     }
 
-    //Returns proof that key is in the tree.
-    //If the key is not in the tree, returns empty vector
-    fn proof(&self, key: String) -> Vec<String> {
+    /// Returns proof that key is in the tree.
+    ///
+    /// If the key is not in the tree, returns an empty vector.
+    ///
+    /// To use the proof, do the following:
+    ///
+    ///     1. Hash your key
+    ///
+    ///     2. Hash the result against the next hash in the proof
+    ///
+    ///     3. Repeat step 2 until proof has been exhausted
+    ///
+    ///     4. Compare the result against the tree root
+
+    pub fn proof(&self, key: String) -> Vec<String> {
         let mut proof: Vec<String> = Vec::new();
         let hash = encode(key);
         let mut current_root: String = String::new();
