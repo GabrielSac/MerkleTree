@@ -45,6 +45,12 @@ A join occurs each time a bit in the counter changes from 1 to 0. The cost of th
 
 The total cost for all 2^n operations is:
 ```math
-\sum_{i=0}^n 
+\sum_{i=0}^n 2^{n-i-1}2^i= (n+1)2^{n-1}
 ```
 
+Thus, the amortized cost for all 2^n operations is:
+```math
+\frac{(n+1)2^{n-1}}{2^n }^right = (n+1)/2
+```
+
+which is logarithmic in the number of added keys. 
