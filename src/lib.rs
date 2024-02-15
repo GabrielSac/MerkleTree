@@ -11,6 +11,7 @@ pub struct Merkle {
     is_complete: bool,
 }
 
+//For the time being, encode just bypasses data. This allows for easy testing of the Merkle tree structure
 fn encode(data: String) -> String {
     data
 }
