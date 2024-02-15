@@ -39,7 +39,7 @@ add_key(&self, key:String).
 
 The amortized time complexity is logarithmic in the number of keys in the tree. $O(log N)$.
 
-Explanation: Adding $N = 2^n$ consecutive keys to an empty Merkle is equivalent to increasing a binary counter from $0$ to $2^n$. The cost of each add is determined by the sizes of the trees the join function is called on (because needs to append the base vector of the right tree to the base vector of the left tree). 
+Explanation: Adding $N = 2^n$ consecutive keys to an empty Merkle is equivalent to increasing a binary counter from $0$ to $2^n$. The cost of each add is determined by the sizes of the trees the join function is called on (because it needs to append the base vector of the right tree to the base vector of the left tree). 
 
 A join occurs each time a bit in the counter changes from 1 to 0. The cost of that join is equal to $2^i$, where $i$ is the bit position in the counter (joins of more significant digits have higher costs because the tree bases are larger). Notice that the i-th bit changes from 1 to 0 2^{n-i-1} times in total. 
 
@@ -54,6 +54,6 @@ Thus, the amortized cost for all $2^n$ operations is:
 ```
 
 ``
-proof(&self, key:String). $O(N)$.
+proof(&self, key:String). 
 ``
 The costly part of this operation is looking for the element amongst the tree leaves. It is $O(N)$ in the worst case, where $N$ is the total number of keys. 
